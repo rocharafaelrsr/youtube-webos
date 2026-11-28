@@ -1,0 +1,25 @@
+name: Publish validated 0.5.4 IPK
+
+on:
+  push:
+    branches: ['release/0.5.4-stable']
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve exact tested artifact
+        run: |
+          gh run download 45733464839 --name youtube_adfree_0.5.4_rc1_ipk --dir release-ipk
+          echo '46204509613e2e3da5bbaef838822e66efcca10a1536b68c4ec2be18d24be536  release-ipk/youtube.leanback.v4_0.5.4_all.ipk' | sha256sum --check
+      - name: Publish stable release from tested source
+        run: |
+          gh release create v0.5.4 release-ipk/youtube.leanback.v4_0.5.4_all.ipk --target 5639b00383e70b91cc5cc64f60df7088cd7e1b3e --title '0.5.4 Stable (independent fork)' --notes-file RELEASE-0.5.4.md --latest
